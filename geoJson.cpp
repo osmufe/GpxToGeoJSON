@@ -52,25 +52,23 @@ static void printGeoJson(ostream &out, const vector<Coords> &coords) {
         "    features: [" << endl;
 
     bool first = true;
+    int count = 0;
     for(vector<Coords>::const_iterator it = coords.begin(); it != coords.end(); it++) {
+        count = count +1;
         if(first) first = false;
         else out << endl;
-    out << "      {" << endl <<
-        "            type: \"Feature\"," << endl;
+    out << "      {" << endl;
+    out << "            type: \"Feature\"," << endl;
     out << "            geometry: {" << endl;
     out << "                type: \"Point\"," << endl;
 
-    out << "                coordinates: [" << (*it).lon << "," << (*it).lat << "]" << endl;
+    out << "                coordinates: [" << (*it).lon << ", " << (*it).lat << "]" << endl;
     out << "            }," << endl;
-    out << "            properties: {}" << endl;
+    out << "            properties: { title: \"HeatmapPts\", id: "<< count <<", name: \"sample "<< count <<"\"}"<< endl;
     out << "      }," << endl;
     }
-
-    out << "                ]" << endl;
-    out << "            }" << endl;
-    out << "        }" << endl;
     out << "    ]" << endl;
-    out << "}" << endl;
+    out << "};" << endl;
 }
 
 static bool processStream(istream &in, ostream &out = cout) {

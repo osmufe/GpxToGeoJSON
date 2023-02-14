@@ -48,8 +48,8 @@ public:
 
 static void printGeoJson(ostream &out, const vector<Coords> &coords) {
     out << "{" << endl <<
-        "  type: \"FeatureCollection\"," << endl <<
-        "  features: [" << endl;
+        "  \"type\": \"FeatureCollection\"," << endl <<
+        "  \"features\": [" << endl;
 
     bool first = true;
     int count = 0;
@@ -58,17 +58,19 @@ static void printGeoJson(ostream &out, const vector<Coords> &coords) {
         if(first) first = false;
         else out << endl;
     out << "    {" << endl;
-    out << "      type: \"Feature\"," << endl;
-    out << "      geometry: {" << endl;
-    out << "        type: \"Point\"," << endl;
+    out << "      \"type\": \"Feature\"," << endl;
+    //out << "      \"properties\": { \"dbh\": 0, \"id\": "<< count <<", \"name\": \"sample "<< count <<"\"},"<< endl;
+    out << "      \"properties\": { \"dbh\": 0},"<< endl;
+    out << "      \"geometry\": {" << endl;
+    out << "        \"type\": \"Point\"," << endl;
 
-    out << "        coordinates: [" << (*it).lon << ", " << (*it).lat << "]" << endl;
-    out << "      }," << endl;
-    out << "      properties: { title: \"HeatmapPts\", id: "<< count <<", name: \"sample "<< count <<"\"}"<< endl;
-    out << "    }," << endl;
+    out << "        \"coordinates\": [" << (*it).lon << ", " << (*it).lat << "]" << endl;
+    out << "      }" << endl;
+    if(it < coords.end()-1 ) out << "    }," << endl;
     }
+    out << "    }" << endl;
     out << "  ]" << endl;
-    out << "};" << endl;
+    out << "}" << endl;
 }
 
 static bool processStream(istream &in, ostream &out = cout) {

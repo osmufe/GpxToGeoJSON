@@ -1,15 +1,15 @@
 /* =============================================================================
- *
+ * 
  * Title:         GPX to GeoJSON converter
  * Author:        Felix Niederwanger
  * License:       Copyright (c), 2021 Felix Niederwanger
  *                MIT license (http://opensource.org/licenses/MIT)
  * Description:   Simple CLI utility to convert GPX to GeoJSON
- *
+ * 
  * =============================================================================
  */
-
-
+ 
+ 
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -19,7 +19,7 @@
 #include <iomanip>
 
 #include <stdio.h>
-#ifdef __linux__
+#ifdef __linux__ 
 #include <unistd.h>
 #endif
 #include "rapidxml.hpp"
@@ -36,7 +36,7 @@ public:
     float lat = 0.0F;
     float ele = 0.0F;
     string time;
-
+    
     Coords() {}
     Coords(const Coords &src) {
         this->lon = src.lon;
@@ -48,50 +48,65 @@ public:
 
 static void printGeoJson(ostream &out, const vector<Coords> &coords) {
     out << "{" << endl <<
-        "  \"type\": \"FeatureCollection\"," << endl <<
-        "  \"features\": [" << endl;
-
+        "    \"type\": \"FeatureCollection\"," << endl <<
+        "    \"features\": [" << endl <<
+        "        {" << endl <<
+        "            \"type\": \"Feature\"," << endl <<
+        "            \"properties\": {" << endl <<
+        "                \"coordTimes\": [" << endl;
+        
     bool first = true;
-    int count = 0;
     for(vector<Coords>::const_iterator it = coords.begin(); it != coords.end(); it++) {
-        count = count +1;
         if(first) first = false;
-        else out << endl;
-    out << "    {" << endl;
-    out << "      \"type\": \"Feature\"," << endl;
-    //out << "      \"properties\": { \"dbh\": 0, \"id\": "<< count <<", \"name\": \"sample "<< count <<"\"},"<< endl;
-    out << "      \"properties\": { \"dbh\": 0},"<< endl;
-    out << "      \"geometry\": {" << endl;
-    out << "        \"type\": \"Point\"," << endl;
-
-    out << "        \"coordinates\": [" << (*it).lon << ", " << (*it).lat << "]" << endl;
-    out << "      }" << endl;
-    if(it < coords.end()-1 ) out << "    }," << endl;
+        else out << ", ";
+        out << "\"" << (*it).time << "\"";
     }
-    out << "    }" << endl;
-    out << "  ]" << endl;
+    out << "]" << endl;
+    out << "            }," << endl;
+    out << "            \"geometry\": {" << endl;
+    out << "                \"type\": \"LineString\"," << endl;
+    out << "                \"coordinates\": [" << endl;
+
+    
+    first = true;
+    for(vector<Coords>::const_iterator it = coords.begin(); it != coords.end(); it++) {
+        if(first) first = false;
+        else out << ", " << endl;
+        
+        out << "                    [" << endl;
+        out << "                        " << (*it).lon << "," << endl;
+        out << "                        " << (*it).lat << "," << endl;
+        out << "                        " << (*it).ele << endl;
+        out << "                    ]";
+    }
+
+    out << endl;
+    out << "                ]" << endl;
+    out << "            }" << endl;
+    out << "        }" << endl;
+    out << "    ]" << endl;
     out << "}" << endl;
 }
 
 static bool processStream(istream &in, ostream &out = cout) {
 	out << setprecision(7);
-
+	
     // Read stream to end
     stringstream buf;
     string text;
     while((getline(in, text)))
         buf << text << '\n';
     text = buf.str();
-
-
+    
+    
     // Parse GPX
     try {
         xml_document<> doc;                     // character type defaults to char
         doc.parse<0>((char*)text.c_str());      // 0 means default parse flags
-
+        
         xml_node<> *node = doc.first_node("gpx");
         if(node == NULL) throw "No data";
-
+        
         // Get GPX attributes
         map<string, string> attrs;              // GPX attributes
         for (xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute())
@@ -106,9 +121,9 @@ static bool processStream(istream &in, ostream &out = cout) {
             for (xml_node<> *seg = child->first_node("trkseg"); seg; seg = seg->next_sibling("trkseg")) {
                 // And track points
                 for (xml_node<> *pt = seg->first_node("trkpt"); pt; pt = pt->next_sibling("trkpt")) {
-
+                    
                     Coords coord;
-
+                    
                     for (xml_attribute<> *attr = pt->first_attribute(); attr; attr = attr->next_attribute()) {
                         string name = attr->name();
                         if(name == "lon")
@@ -123,15 +138,15 @@ static bool processStream(istream &in, ostream &out = cout) {
                         else if (name == "time")
                             coord.time = p->value();
                     }
-
+                    
                     coords.push_back(coord);
-
+                    
                 }
             }
         }
-
+        
         printGeoJson(out, coords);
-
+        
     } catch (parse_error &e) {
         cerr << "Parse error: " << e.what() << endl;
         return false;
@@ -144,7 +159,7 @@ static bool processStream(istream &in, ostream &out = cout) {
 
 int main(int argc, char** argv) {
     if(argc < 2) {
-#ifdef __linux__
+#ifdef __linux__ 
 	// Print message only if terminal, not if pipe or file
 	if (::isatty(STDIN_FILENO))
         	cerr << "Reading from stdin until eof" << endl;
@@ -152,14 +167,14 @@ int main(int argc, char** argv) {
         processStream(cin, cout);
     } else {
         string o_filename;      // Output filename, if empty stdout
-
+        
         for(int i=1;i<argc;i++) {
             string arg = argv[i];
             if(arg == "") continue;
             if(arg.at(0) == '-') {
                 if(arg == "-h" || arg == "--help") {
                     cout << "GPX to GeoJson converter || 2017, phoenix" << endl << endl;
-
+                    
                     cout << "Usage: " << argv[0] << " [OPTIONS] [FILES]" << endl;
                     cout << "OPTIONS:" << endl;
                     cout << "  -h   --help         Print this help message" << endl;
@@ -185,7 +200,7 @@ int main(int argc, char** argv) {
             } else {
                 ifstream f_in(argv[i]);
                 if(f_in.is_open()) {
-
+                    
                     if (o_filename.size() > 0) {
                         ofstream f_out(o_filename.c_str(), ofstream::out | ofstream::app);
                         if (!f_out.is_open()) {
@@ -200,11 +215,11 @@ int main(int argc, char** argv) {
                     }
 
                     f_in.close();
-
+                    
                 } else {
                     cerr << "Error opening " << argv[i] << endl;
                     return EXIT_FAILURE;
-                }
+                }   
             }
         }
 

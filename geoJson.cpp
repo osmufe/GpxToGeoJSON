@@ -60,7 +60,7 @@ static void printGeoJson(ostream &out, const vector<Coords> &coords) {
     out << "    {" << endl;
     out << "      \"type\": \"Feature\"," << endl;
     //out << "      \"properties\": { \"dbh\": 0, \"id\": "<< count <<", \"name\": \"sample "<< count <<"\"},"<< endl;
-    out << "      \"properties\": { \"dbh\": 0},"<< endl;
+    //out << "      \"properties\": { \"dbh\": 0},"<< endl;
     out << "      \"geometry\": {" << endl;
     out << "        \"type\": \"Point\"," << endl;
 

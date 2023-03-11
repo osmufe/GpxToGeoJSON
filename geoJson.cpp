@@ -53,14 +53,17 @@ static void printGeoJson(ostream &out, const vector<Coords> &coords) {
 
     bool first = true;
     int count = 0;
+    srand((unsigned)time(0));
+    int num_random;
     for(vector<Coords>::const_iterator it = coords.begin(); it != coords.end(); it++) {
         count = count +1;
+        num_random = (rand()%25)+1;
         if(first) first = false;
         else out << endl;
     out << "    {" << endl;
     out << "      \"type\": \"Feature\"," << endl;
     //out << "      \"properties\": { \"dbh\": 0, \"id\": "<< count <<", \"name\": \"sample "<< count <<"\"},"<< endl;
-    //out << "      \"properties\": { \"dbh\": 0},"<< endl;
+    out << "      \"properties\": { \"dbh\": << "num_random <<"},"<< endl;	    
     out << "      \"geometry\": {" << endl;
     out << "        \"type\": \"Point\"," << endl;
 
